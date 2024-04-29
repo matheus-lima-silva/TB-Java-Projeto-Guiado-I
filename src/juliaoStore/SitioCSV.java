@@ -1,13 +1,12 @@
 package juliaoStore;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class SitioCSV {
     // Caminho do arquivo
-    private static String rotaArquivo = "./data/sitiossudeste.csv";
+    private static final String rotaArquivo = "./data/sitiossudeste.csv";
 
     //metodo para adicionar um sitio ao arquivo csv
     public static void AdicionarSitio(Site f) {
@@ -16,12 +15,7 @@ public class SitioCSV {
             boolean arquivoExiste = new File(rotaArquivo).exists();
 
             //Abre o escritor para adicionar dados ao arquivo
-            FileWriter escritor = new FileWriter(rotaArquivo, StandardCharsets.UTF_8, true);
-            if (!arquivoExiste) {
-                escritor.write("ID;UF;MUNICIPIO;ENDEREÇO;TIPO;CEP;LATITUDE;LONGITUDE;VISITADO\n");
-            }
-            //escrever dados do ativo no formato apropriado
-            escritor.write(f.getId() + ";" + f.getUf() + ";" + f.getMunicipio() + ";" + f.getEndereco() + ";" + f.getTipo() + ";" + f.getCep() + ";" + f.getLatitude() + ";" + f.getLongitude() + ";" + f.isVisitado() + "\n");
+            var escritor = getEscritor(f, arquivoExiste);
             //escrever todos os dados do buffer no arquivo imediatamente
             escritor.flush();
             //fechar o recurso de escrita
@@ -32,15 +26,26 @@ public class SitioCSV {
         }
     }
 
+    private static FileWriter getEscritor(Site f, boolean arquivoExiste) throws IOException {
+        FileWriter escritor = new FileWriter(rotaArquivo, StandardCharsets.UTF_8, true);
+        if (!arquivoExiste) {
+            escritor.write("ID;UF;MUNICIPIO;ENDEREÇO;TIPO;CEP;LATITUDE;LONGITUDE;VISITADO\n");
+        }
+        //escrever dados do ativo no formato apropriado
+        escritor.write(f.getId() + ";" + f.getUf() + ";" + f.getMunicipio() + ";" + f.getEndereco() + ";" + f.getTipo() + ";" + f.getCep() + ";" + f.getLatitude() + ";" + f.getLongitude() + ";" + f.isVisitado() + "\n");
+        return escritor;
+    }
+
     // metodo para listar sites do arquivo sitioscsv
     public static ArrayList<Site> ListarSite() {
-        ArrayList<Site> lista = new ArrayList<>();
 
+        ArrayList<Site> lista1 = new ArrayList<>();
         try {
             //abrir um leitor de arquivo
             BufferedReader leitor = new BufferedReader(new FileReader(rotaArquivo));
             String linha;
             boolean primeiraLinha = true;
+            
             while ((linha = leitor.readLine()) != null) {
                 //ignora header
                 if (primeiraLinha) {
@@ -60,20 +65,24 @@ public class SitioCSV {
                 boolean visitado = Boolean.parseBoolean(partes[8]);
 
                 //criando objeto site
-                Site s = new Site(id, uf, municipio, endereco, tipo, cep, latitude, longitude, visitado);
+                Site s;
+                s = new Site(id, uf, municipio, endereco, tipo, cep, latitude, longitude, visitado);
 
                 // adiciona a lista
-                lista.add(s);
+                lista1.add(s);
 
                 //imprimir site
                 System.out.println("ID: " + id + "UF: " + uf + "MUNICIPIO: " + municipio);
 
-                leitor.close();
+
             }
+
+            leitor.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return lista;
+        return lista1;
     }
 
 }
